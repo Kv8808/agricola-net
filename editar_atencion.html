@@ -11,10 +11,11 @@
   <input id="fecha" type="date" required>
   <button type="submit">GUARDAR CAMBIOS</button>
 </form>
+
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co'
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  const SUPABASE_URL = 'https://dclodqpggfezfqjzsrdx.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM'
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
   const params = new URLSearchParams(location.search)
@@ -23,7 +24,7 @@
 
   async function load(){
     const { data, error } = await supabase.from('atenciones').select('*').eq('id_atencion', id).single()
-    if(error){ alert('Error: ' + error.message); return }
+    if(error){ alert('Error: ' + error.message); console.error(error); return }
     document.getElementById('id_empleado').value = data.id_empleado
     document.getElementById('nombre_cliente').value = data.nombre_cliente
     document.getElementById('producto').value = data.producto
@@ -31,23 +32,27 @@
     document.getElementById('fecha').value = data.fecha
   }
 
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault()
-    const id_empleado = parseInt(document.getElementById('id_empleado').value)
-    const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
-    const producto = document.getElementById('producto').value.trim()
-    const monto = parseFloat(document.getElementById('monto').value)
-    const fecha = document.getElementById('fecha').value
+  if (!form) {
+    console.error('No se encontró #form en editar_atencion.html')
+  } else {
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault()
+      const id_empleado = parseInt(document.getElementById('id_empleado').value)
+      const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
+      const producto = document.getElementById('producto').value.trim()
+      const monto = parseFloat(document.getElementById('monto').value)
+      const fecha = document.getElementById('fecha').value
 
-    const { error } = await supabase
-      .from('atenciones')
-      .update({ id_empleado, nombre_cliente, producto, monto, fecha })
-      .eq('id_atencion', id)
+      const { error } = await supabase
+        .from('atenciones')
+        .update({ id_empleado, nombre_cliente, producto, monto, fecha })
+        .eq('id_atencion', id)
 
-    if(error){ alert('Error: ' + error.message); return }
-    alert('Actualizado')
-    window.location.href = 'ver_atenciones.html'
-  })
+      if(error){ alert('Error: ' + error.message); console.error(error); return }
+      alert('Actualizado')
+      window.location.href = 'ver_atenciones.html'
+    })
+  }
 
   load()
 </script>

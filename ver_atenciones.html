@@ -26,77 +26,82 @@ a{color:#81c784;text-decoration:none;font-weight:bold}
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co'
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  const SUPABASE_URL = 'https://dclodqpggfezfqjzsrdx.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM'
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
   let page = 1, limit = 10
-
   const tableWrap = document.getElementById('table-wrap')
   const pageInfo = document.getElementById('pageInfo')
   const prevBtn = document.getElementById('prev')
   const nextBtn = document.getElementById('next')
 
-  async function load() {
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    const { data, error, count } = await supabase
-      .from('atenciones')
-      .select('*', { count: 'exact' })
-      .order('fecha', { ascending: false })
-      .range(from, to)
-
-    if (error) {
-      tableWrap.innerHTML = '<p>Error: ' + error.message + '</p>'
-      return
-    }
-
-    const total = count || 0
-    const pages = Math.max(1, Math.ceil(total / limit))
-    pageInfo.textContent = `Página ${page} de ${pages} - Total: ${total}`
-
-    const rows = data.map(row => `
-      <tr>
-        <td>${row.id_atencion}</td>
-        <td>${row.id_empleado}</td>
-        <td>${escapeHtml(row.nombre_cliente)}</td>
-        <td>${escapeHtml(row.producto)}</td>
-        <td>${row.monto}</td>
-        <td>${row.fecha}</td>
-        <td>
-          <a class="button" href="editar_atencion.html?id=${row.id_atencion}">Editar</a>
-          <a class="button" data-id="${row.id_atencion}" href="#" onclick="del(event)">Eliminar</a>
-        </td>
-      </tr>
-    `).join('')
-
-    tableWrap.innerHTML = `
-      <table>
-        <tr>
-          <th>ID</th><th>Empleado</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Fecha</th><th>Acciones</th>
-        </tr>
-        ${rows}
-      </table>
-    `
-    prevBtn.disabled = page <= 1
-    nextBtn.disabled = page >= pages
-  }
-
   function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
 
-  prevBtn.addEventListener('click', ()=>{ page--; load() })
+  async function load() {
+    try {
+      // paginación por rango
+      const from = (page - 1) * limit
+      const to = from + limit - 1
+
+      // obtenemos conteo exacto con select('*', { count: 'exact' })
+      const { data, error, count } = await supabase
+        .from('atenciones')
+        .select('*', { count: 'exact' })
+        .order('fecha', { ascending: false })
+        .range(from, to)
+
+      if (error) throw error
+
+      const total = count || 0
+      const pages = Math.max(1, Math.ceil(total / limit))
+      pageInfo.textContent = `Página ${page} de ${pages} - Total: ${total}`
+
+      const rows = (data || []).map(row => `
+        <tr>
+          <td>${row.id_atencion}</td>
+          <td>${row.id_empleado}</td>
+          <td>${escapeHtml(row.nombre_cliente)}</td>
+          <td>${escapeHtml(row.producto)}</td>
+          <td>${row.monto}</td>
+          <td>${row.fecha}</td>
+          <td>
+            <a class="button" href="editar_atencion.html?id=${row.id_atencion}">Editar</a>
+            <a class="button" data-id="${row.id_atencion}" href="#" onclick="del(event)">Eliminar</a>
+          </td>
+        </tr>
+      `).join('')
+
+      tableWrap.innerHTML = `
+        <table>
+          <tr>
+            <th>ID</th><th>Empleado</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Fecha</th><th>Acciones</th>
+          </tr>
+          ${rows}
+        </table>
+      `
+      prevBtn.disabled = page <= 1
+      nextBtn.disabled = page >= pages
+    } catch (err) {
+      console.error('Load error:', err)
+      tableWrap.innerHTML = '<p>Error al cargar: ' + (err.message || err) + '</p>'
+    }
+  }
+
+  prevBtn.addEventListener('click', ()=>{ if (page>1) { page--; load() } })
   nextBtn.addEventListener('click', ()=>{ page++; load() })
 
   window.del = async function(e){
     e.preventDefault()
     const id = e.currentTarget.getAttribute('data-id')
     if(!confirm('Eliminar registro #' + id + '?')) return
-    const { error } = await supabase.from('atenciones').delete().eq('id_atencion', id)
-    if(error) { alert('Error al eliminar: ' + error.message); return }
+    const { data, error } = await supabase.from('atenciones').delete().eq('id_atencion', id)
+    if(error){ alert('Error al eliminar: ' + error.message); console.error(error); return }
     alert('Eliminado')
     load()
   }
 
+  // cargar al abrir
   load()
 </script>
 </body>

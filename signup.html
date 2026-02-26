@@ -1,21 +1,27 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Registro</title></head><body>
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Registro</title></head>
+<body>
 <h2>Registro</h2>
 <form id="f">
   <input id="email" type="email" placeholder="Email" required>
   <input id="pass" type="password" placeholder="Contraseña" required>
   <button>Registrar</button>
 </form>
+
 <script type="module">
- import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
- const supabase = createClient('https://YOUR_SUPABASE_URL.supabase.co','YOUR_SUPABASE_ANON_KEY')
- document.getElementById('f').addEventListener('submit', async e=>{
-   e.preventDefault()
-   const email = document.getElementById('email').value
-   const pass = document.getElementById('pass').value
-   const { data, error } = await supabase.auth.signUp({ email, password: pass })
-   if(error) return alert(error.message)
-   alert('Revisa tu email para confirmar. Luego inicia sesión.')
-   window.location.href = 'login.html'
- })
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabase = createClient('https://dclodqpggfezfqjzsrdx.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM')
+
+  document.getElementById('f').addEventListener('submit', async e=>{
+    e.preventDefault()
+    const email = document.getElementById('email').value
+    const pass = document.getElementById('pass').value
+    const { data, error } = await supabase.auth.signUp({ email, password: pass })
+    if(error) return alert(error.message)
+    alert('Revisa tu email para confirmar. Luego inicia sesión.')
+    window.location.href = 'login.html'
+  })
 </script>
-</body></html>
+</body>
+</html>
