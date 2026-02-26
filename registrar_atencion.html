@@ -3,15 +3,21 @@
 <head>
 <meta charset="utf-8">
 <title>Registrar Atención</title>
-<style>
-body{font-family:Arial;background:#2e7d32;color:white;text-align:center}
-form{background:rgba(0,0,0,0.5);width:400px;margin:40px auto;padding:20px;border-radius:10px}
-input, select, button{width:100%;padding:8px;margin:8px 0}
-button{background:#4caf50;color:white;border:none;cursor:pointer}
-button:hover{background:#66bb6a}
-</style>
+<style> /* tu CSS */ body{font-family:Arial;background:#2e7d32;color:white;text-align:center} form{background:rgba(0,0,0,0.5);width:400px;margin:40px auto;padding:20px;border-radius:10px} input, select, button{width:100%;padding:8px;margin:8px 0} button{background:#4caf50;color:white;border:none;cursor:pointer} button:hover{background:#66bb6a;} </style>
 </head>
 <body>
+
+<script type="module">
+  import { supabase } from './js/supabaseClient.js'
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      window.location.href = 'login.html'
+      return
+    }
+  })()
+</script>
+
 <h2>REGISTRAR ATENCIÓN</h2>
 
 <form id="form">
@@ -31,65 +37,49 @@ button:hover{background:#66bb6a}
 </form>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  import { supabase } from './js/supabaseClient.js'
 
-  // --- REEMPLAZA con tus datos de Supabase ---
-  const SUPABASE_URL = 'https://dclodqpggfezfqjzsrdx.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM'
-  // --------------------------------------------
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-  // esperar a que exista el formulario (script está al final del body)
   const form = document.getElementById('form')
-  if (!form) {
-    console.error('No se encontró el formulario #form')
-  } else {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      // obtener usuario autenticado
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      if (userError) {
-        console.error('Auth getUser error:', userError)
-        alert('Error de autenticación: ' + userError.message)
-        return
-      }
-      if (!user) {
-        alert('Debes iniciar sesión antes de registrar una atención.')
-        window.location.href = 'login.html'
-        return
-      }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
 
-      const id_empleado = parseInt(document.getElementById('id_empleado').value)
-      const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
-      const producto = document.getElementById('producto').value.trim()
-      const monto = parseFloat(document.getElementById('monto').value)
-      const fecha = document.getElementById('fecha').value
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      alert('Debes iniciar sesión antes de registrar una atención.')
+      window.location.href = 'login.html'
+      return
+    }
 
-      if (!nombre_cliente || !producto || isNaN(monto) || !fecha) {
-        alert('Rellena todos los campos correctamente.')
-        return
-      }
+    const id_empleado = parseInt(document.getElementById('id_empleado').value)
+    const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
+    const producto = document.getElementById('producto').value.trim()
+    const monto = parseFloat(document.getElementById('monto').value)
+    const fecha = document.getElementById('fecha').value
 
-      const { data, error } = await supabase
-        .from('atenciones')
-        .insert([{
-          id_empleado,
-          nombre_cliente,
-          producto,
-          monto,
-          fecha,
-          user_id: user.id
-        }])
+    if (!nombre_cliente || !producto || isNaN(monto) || !fecha) {
+      alert('Rellena todos los campos correctamente.')
+      return
+    }
 
-      if (error) {
-        console.error('Insert error:', error)
-        alert('Error: ' + error.message)
-        return
-      }
-      alert('Atención registrada')
-      window.location.href = 'ver_atenciones.html'
-    })
-  }
+    const { data, error } = await supabase
+      .from('atenciones')
+      .insert([{
+        id_empleado,
+        nombre_cliente,
+        producto,
+        monto,
+        fecha,
+        user_id: user.id
+      }])
+
+    if (error) {
+      console.error('Insert error:', error)
+      alert('Error: ' + error.message)
+      return
+    }
+    alert('Atención registrada')
+    window.location.href = 'ver_atenciones.html'
+  })
 </script>
 </body>
 </html>

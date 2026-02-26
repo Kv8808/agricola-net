@@ -3,16 +3,21 @@
 <head>
 <meta charset="utf-8">
 <title>Ver Atenciones</title>
-<style>
-body{font-family:Arial;background:#1b5e20;color:white;text-align:center}
-table{margin:30px auto;border-collapse:collapse;width:90%}
-th, td{border:1px solid white;padding:8px}
-a{color:#81c784;text-decoration:none;font-weight:bold}
-.pagination{margin: 16px;}
-.button{background:#4caf50;color:white;padding:6px 10px;border-radius:6px;text-decoration:none}
-</style>
+<style> body{font-family:Arial;background:#1b5e20;color:white;text-align:center} table{margin:30px auto;border-collapse:collapse;width:90%} th, td{border:1px solid white;padding:8px} a{color:#81c784;text-decoration:none;font-weight:bold} .pagination{margin: 16px;} .button{background:#4caf50;color:white;padding:6px 10px;border-radius:6px;text-decoration:none} </style>
 </head>
 <body>
+
+<script type="module">
+  import { supabase } from './js/supabaseClient.js'
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      window.location.href = 'login.html'
+      return
+    }
+  })()
+</script>
+
 <h2>LISTA DE ATENCIONES</h2>
 
 <div id="table-wrap"></div>
@@ -25,11 +30,7 @@ a{color:#81c784;text-decoration:none;font-weight:bold}
 <a href="index.html">Volver al inicio</a>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  const SUPABASE_URL = 'https://dclodqpggfezfqjzsrdx.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM'
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
+  import { supabase } from './js/supabaseClient.js'
   let page = 1, limit = 10
   const tableWrap = document.getElementById('table-wrap')
   const pageInfo = document.getElementById('pageInfo')
@@ -40,11 +41,9 @@ a{color:#81c784;text-decoration:none;font-weight:bold}
 
   async function load() {
     try {
-      // paginación por rango
       const from = (page - 1) * limit
       const to = from + limit - 1
 
-      // obtenemos conteo exacto con select('*', { count: 'exact' })
       const { data, error, count } = await supabase
         .from('atenciones')
         .select('*', { count: 'exact' })
@@ -101,7 +100,6 @@ a{color:#81c784;text-decoration:none;font-weight:bold}
     load()
   }
 
-  // cargar al abrir
   load()
 </script>
 </body>

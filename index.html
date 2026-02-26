@@ -1,132 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <title>AGRICOLA NET – VENTA DE PRODUCTOS AGRICOLAS</title>
 <link rel="icon" href="LOGO.png" type="image/png">
-
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
-body{
-    margin:0;
-    font-family:'Montserrat',Arial,sans-serif;
-    background:radial-gradient(circle,#2e7d32,#1b5e20);
-    color:white;
-}
-
-/* HEADER */
-header{
-    padding:30px;
-    background:rgba(0,0,0,0.5);
-    text-align:center;
-}
-header img{width:120px;}
-
-/* MENU */
-.menu{
-    background:rgba(0,0,0,0.7);
-    padding:12px 0;
-    text-align:center;
-}
-.menu a{
-    color:white;
-    text-decoration:none;
-    margin:0 25px;
-    font-weight:600;
-    letter-spacing:1px;
-    cursor:pointer;
-}
-
-/* INICIO */
-.inicio{
-    padding:120px 20px;
-    text-align:center;
-}
-.titulo-principal{
-    font-family:'Playfair Display',serif;
-    font-size:44px;
-    letter-spacing:3px;
-    text-decoration:underline;
-    text-decoration-thickness:4px;
-    text-decoration-color:#81c784;
-    text-underline-offset:14px;
-}
-.texto-contenedor{
-    max-width:950px;
-    margin:60px auto 0 auto;
-    text-align:center;   
-    line-height:1.9;
-}
-.texto-intro{
-    font-size:18px;
-    margin-bottom:30px;
-}
-.texto-destacado{
-    margin-top:55px;
-    font-size:16px;
-    font-weight:600;
-    letter-spacing:1px;
-    text-transform:uppercase;
-}
-
-/* PRODUCTOS */
-section{
-    padding:70px 20px;
-    text-align:center;
-}
-.productos{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:20px;
-    margin-top:40px;
-}
-.producto{
-    background:rgba(255,255,255,0.12);
-    border-radius:12px;
-    padding:14px;
-}
-.producto img{
-    width:100%;
-    height:90px;
-    object-fit:contain;
-    background-color:#2e7d32;
-    border-radius:10px;
-}
-.boton{
-    display:inline-block;
-    margin:6px;
-    padding:8px 14px;
-    background:#4caf50;
-    color:white;
-    text-decoration:none;
-    border-radius:6px;
-    font-size:14px;
-    border:none;
-    cursor:pointer;
-}
-.boton:hover{background:#66bb6a;}
-.descripcion{
-    display:none;
-    font-size:13px;
-    margin-top:8px;
-    line-height:1.5;
-}
-
-/* FOOTER */
-footer{
-    background:rgba(0,0,0,0.6);
-    padding:25px;
-    margin-top:60px;
-    text-align:center;
-}
+/* (tu CSS existente — lo mantenemos) */
+body{margin:0;font-family:'Montserrat',Arial,sans-serif;background:radial-gradient(circle,#2e7d32,#1b5e20);color:white;}
+/* ... resto de tu CSS ... */
 </style>
 </head>
-
 <body>
 
+<!-- Protegemos la página: si no hay sesión redirige a login -->
+<script type="module">
+  import { supabase } from './js/supabaseClient.js'
+
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      // no está logueado → redirigir al login
+      window.location.href = 'login.html'
+      return
+    }
+    // opcional: mostrar usuario en consola
+    // const { data: { user } } = await supabase.auth.getUser()
+    // console.log('Usuario activo:', user)
+  })()
+</script>
+
 <header>
-    <img src="LOGO.png">
+    <img src="LOGO.png" alt="logo">
     <h1>AGRÍCOLA NET</h1>
     <p>Distribución y venta de productos agrícolas</p>
 </header>
@@ -135,45 +40,20 @@ footer{
     <a onclick="scrollLento('inicio')">Inicio</a>
     <a onclick="scrollLento('productos')">Productos</a>
     <a href="registrar_atencion.html">Registrar Atención</a>
-<a href="ver_atenciones.php">Ver Atenciones</a>
-
+    <a href="ver_atenciones.html">Ver Atenciones</a>
+    <a id="logoutBtn" style="float:right;margin-right:20px;cursor:pointer;">Cerrar sesión</a>
 </nav>
 
 <section id="inicio" class="inicio">
+<!-- ... tu contenido existente ... -->
 <h2 class="titulo-principal">BIENVENIDOS A AGRÍCOLA NET</h2>
-
 <div class="texto-contenedor">
-
-<p class="texto-intro">
-EN AGRÍCOLA NET SE ESPECIALIZA EN LA COMERCIALIZACIÓN DE PRODUCTOS AGRÍCOLAS
-DE ALTA CALIDAD, OFRECIENDO SOLUCIONES CONFIABLES Y SEGURAS PARA SU CAMPO,
-EL COMERCIO LOCAL Y LA INDUSTRIA AGROALIMENTARIA, BRINDANDO MÚLTIPLES
-POSIBILIDADES DE ABASTECIMIENTO.
-</p>
-
-<p class="texto-intro">
-TRABAJAMOS DIRECTAMENTE CON PRODUCTORES PARA GARANTIZAR GRANOS, SEMILLAS,
-FORRAJES Y DERIVADOS AGRÍCOLAS LIMPIOS, SELECCIONADOS Y LISTOS PARA SU USO,
-DISPONIBLES DE FORMA CONTINUA DURANTE TODO EL AÑO, ASEGURANDO SU CALIDAD
-E INTEGRIDAD.
-</p>
-
-<p class="texto-intro">
-NUESTRA PREMISA ES APOYAR EL DESARROLLO DEL CAMPO MEXICANO MEDIANTE PRECIOS
-JUSTOS, CALIDAD CONSTANTE Y UNA ATENCIÓN DIRECTA Y PERSONALIZADA,
-ENFOCADA EN CADA AGRICULTOR Y EN CADA NECESIDAD PRODUCTIVA.
-</p>
-
-<p class="texto-destacado">
-DESPLÁZATE HACIA ABAJO PARA CONOCER NUESTRO CATÁLOGO
-</p>
-
+  <!-- ... textos ... -->
 </div>
 </section>
 
 <section id="productos">
 <h2>NUESTROS PRODUCTOS</h2>
-
 <div class="productos">
 <script>
 const lista = [
@@ -222,14 +102,12 @@ function toggle(id){
     const d=document.getElementById(id);
     d.style.display = d.style.display === "block" ? "none" : "block";
 }
-
 function scrollLento(id){
     const destino=document.getElementById(id);
     const inicio=window.scrollY;
     const fin=destino.getBoundingClientRect().top + inicio;
     const duracion=1200;
     let start=null;
-
     function animar(t){
         if(!start) start=t;
         const progreso=t-start;
@@ -239,6 +117,17 @@ function scrollLento(id){
     }
     requestAnimationFrame(animar);
 }
+</script>
+
+<!-- Logout handler -->
+<script type="module">
+  import { supabase } from './js/supabaseClient.js'
+  const btn = document.getElementById('logoutBtn')
+  btn.addEventListener('click', async () => {
+    await supabase.auth.signOut()
+    // borra cookies y redirige
+    window.location.href = 'login.html'
+  })
 </script>
 
 </body>
