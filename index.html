@@ -6,17 +6,43 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="LOGO.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
-/* tu CSS resumido (mantén tu estilo original si quieres) */
+/* ====== tu CSS original (con overrides responsivos al final) ====== */
 body{margin:0;font-family:'Montserrat',Arial,sans-serif;background:radial-gradient(circle,#2e7d32,#1b5e20);color:white;}
 header{padding:30px;background:rgba(0,0,0,0.5);text-align:center}
-.menu{background:rgba(0,0,0,0.7);padding:12px 0;text-align:center}
+.menu{background:rgba(0,0,0,0.7);padding:12px 0;text-align:center;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
 .menu a{color:white;text-decoration:none;margin:0 25px;font-weight:600;letter-spacing:1px;cursor:pointer}
+.menu .right{margin-left:auto;margin-right:16px}
 footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center}
+
+/* small widget and grid */
+.fx-widget{max-width:1100px;margin:12px auto;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.06);border-radius:8px}
+.fx-widget .left{font-size:16px}
+.fx-widget .right{font-size:14px;color:#dff0d8}
+
+/* products grid adjustments (keeps your style but responsive) */
+#productos-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;max-width:1100px;margin:18px auto;padding:0 12px}
+.product-card{background:rgba(255,255,255,0.08);padding:12px;border-radius:8px;text-align:center}
+.product-card img{width:100%;height:90px;object-fit:contain;background:#2e7d32;border-radius:6px}
+.boton{display:inline-block;margin:4px;padding:8px 10px;background:#4caf50;color:white;border-radius:6px;text-decoration:none}
+
+/* small screens */
+@media (max-width: 720px){
+  header{padding:18px}
+  .menu{justify-content:space-between;padding:10px 8px}
+  .menu a{margin:6px;font-size:14px}
+  .menu .right{order:99;margin-left:0}
+  .fx-widget{flex-direction:column;align-items:flex-start;gap:8px;padding:10px}
+  body{font-size:15px}
+  #productos-container{gap:12px;padding:0 10px}
+  .product-card img{height:72px}
+}
 </style>
 </head>
 <body>
 
+<!-- ===== existing auth check: mantenido exactamente ===== -->
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
 
@@ -40,12 +66,27 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
     <p>Distribución y venta de productos agrícolas</p>
 </header>
 
+<!-- FX widget: aquí mostramos la API externa (USD->MXN) y acceso rápido a clima -->
+<div id="fx-widget" class="fx-widget" aria-live="polite">
+  <div class="left">
+    <strong id="fx-text">Cargando cotización USD → MXN...</strong>
+    <div id="fx-date" class="small" style="opacity:0.9;font-size:0.9rem"></div>
+  </div>
+  <div class="right">
+    <label for="city-input" style="display:block;margin-bottom:6px;font-size:0.9rem">Buscar clima:</label>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="city-input" placeholder="Ej: Culiacán, MX" style="padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:white" />
+      <button id="city-btn" style="padding:7px 10px;border-radius:6px;border:none;background:#4caf50;color:white;cursor:pointer">Buscar</button>
+    </div>
+  </div>
+</div>
+
 <nav class="menu">
     <a onclick="scrollLento('inicio')">Inicio</a>
     <a onclick="scrollLento('productos')">Productos</a>
     <a href="registrar_atencion.html">Registrar Atención</a>
     <a href="ver_atenciones.html">Ver Atenciones</a>
-    <a id="logoutBtn" style="float:right;margin-right:20px;cursor:pointer;">Cerrar sesión</a>
+    <a id="logoutBtn" class="right" style="cursor:pointer;">Cerrar sesión</a>
 </nav>
 
 <section id="inicio" style="padding:60px;text-align:center">
@@ -53,9 +94,9 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
   <p style="max-width:900px;margin:18px auto;line-height:1.8">EN AGRÍCOLA NET SE ESPECIALIZA EN LA COMERCIALIZACIÓN DE PRODUCTOS AGRÍCOLAS...</p>
 </section>
 
-<section id="productos" style="padding:40px">
+<section id="productos" style="padding:40px 0">
   <h2 style="text-align:center">NUESTROS PRODUCTOS</h2>
-  <div id="productos-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;max-width:1100px;margin:18px auto"></div>
+  <div id="productos-container"></div>
 </section>
 
 <footer>
@@ -63,6 +104,7 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
 </footer>
 
 <script>
+/* tu lista de productos (sin cambios) */
 const lista = [
   ["Maíz","maiz.png","maiz.pdf"],["Frijol","frijol.png","maiz.pdf"],["Arroz","arroz.png","maiz.pdf"],
   ["Trigo","trigo.png","maiz.pdf"],["Cebada","cebada.png","maiz.pdf"],["Avena","avena.png","maiz.pdf"],
@@ -74,12 +116,12 @@ const lista = [
 const container = document.getElementById('productos-container')
 if (container) {
   container.innerHTML = lista.map((p,i)=>`
-    <div style="background:rgba(255,255,255,0.08);padding:12px;border-radius:8px;text-align:center">
-      <img src="${p[1]}" alt="${p[0]}" style="width:100%;height:90px;object-fit:contain;background:#2e7d32;border-radius:6px">
+    <div class="product-card">
+      <img src="${p[1]}" alt="${p[0]}">
       <h4>${p[0]}</h4>
       <div style="margin-top:8px">
-        <a class="boton" href="https://wa.me/521XXXXXXXXXX" style="display:inline-block;margin:4px;padding:8px 10px;background:#4caf50;color:white;border-radius:6px;text-decoration:none">Comprar</a>
-        <a class="boton" href="${p[2]}" target="_blank" style="display:inline-block;margin:4px;padding:8px 10px;background:#4caf50;color:white;border-radius:6px;text-decoration:none">Ficha</a>
+        <a class="boton" href="https://wa.me/521XXXXXXXXXX">Comprar</a>
+        <a class="boton" href="${p[2]}" target="_blank">Ficha</a>
       </div>
     </div>
   `).join('')
@@ -103,6 +145,7 @@ function scrollLento(id){
 }
 </script>
 
+<!-- logout handler (mantengo tu implementación) -->
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
   const btn = document.getElementById('logoutBtn')
@@ -118,6 +161,75 @@ function scrollLento(id){
     })
   } else {
     console.warn('logoutBtn no encontrado')
+  }
+</script>
+
+<!-- ========== Aquí integramos la API externa (módulo) ========== -->
+<script type="module">
+  // IMPORTANTE: este archivo debe existir en /js/external-api.js
+  // (si no existe, verás error en consola; abajo te indico cómo crear el archivo)
+  try {
+    const mod = await import('./js/external-api.js')
+
+    // función para actualizar la cotización en la UI
+    async function updateFx() {
+      const fxText = document.getElementById('fx-text')
+      const fxDate = document.getElementById('fx-date')
+      if (!fxText) return
+      fxText.textContent = 'Cargando cotización...'
+      try {
+        const r = await mod.getUsdMxn()
+        if (!r || r.rate == null) {
+          fxText.textContent = 'Cotización no disponible'
+          fxDate.textContent = ''
+          return
+        }
+        fxText.innerHTML = `1 USD = <strong style="font-size:1.1rem">${Number(r.rate).toFixed(2)} MXN</strong>`
+        fxDate.textContent = r.date ? `Fecha: ${r.date}` : ''
+        console.log('getUsdMxn ok', r)
+      } catch (err) {
+        fxText.textContent = 'Error al obtener cotización'
+        fxDate.textContent = ''
+        console.error('updateFx error', err)
+      }
+    }
+
+    // busca clima por ciudad y muestra en el widget pequeño (reemplaza texto)
+    async function searchWeather(city) {
+      const out = document.getElementById('fx-text')
+      if (!city) { out.textContent = 'Ingrese ciudad para clima'; return }
+      out.textContent = 'Buscando clima...'
+      try {
+        const r = await mod.getWeatherByCity(city)
+        if (!r || !r.weather) {
+          out.textContent = 'No se encontró clima para: ' + city
+          return
+        }
+        out.innerHTML = `<strong>${r.city.split(',')[0]}</strong> — ${r.weather.temperature} °C, Viento ${r.weather.windspeed} m/s<br><span style="opacity:0.9;font-size:0.9rem">Hora: ${r.weather.time}</span>`
+      } catch (err) {
+        out.textContent = 'Error clima: ' + (err.message || err)
+        console.error('searchWeather err', err)
+      } finally {
+        // restaurar cotización después de 6s
+        setTimeout(updateFx, 6000)
+      }
+    }
+
+    // inicializa
+    updateFx()
+    document.getElementById('city-btn').addEventListener('click', ()=> {
+      const c = document.getElementById('city-input').value.trim()
+      if (c) searchWeather(c)
+    })
+    document.getElementById('city-input').addEventListener('keydown', (e)=> {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('city-btn').click() }
+    })
+
+  } catch (err) {
+    console.error('No se pudo cargar ./js/external-api.js — revisa que exista.', err)
+    // mostrar error visible
+    const fxText = document.getElementById('fx-text')
+    if (fxText) fxText.textContent = 'API externa no cargada (falta /js/external-api.js)'
   }
 </script>
 
