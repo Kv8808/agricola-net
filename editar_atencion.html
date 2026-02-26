@@ -3,33 +3,56 @@
 <head><meta charset="utf-8"><title>Editar Atención</title></head>
 <body style="font-family:Arial;background:#2e7d32;color:white;text-align:center">
 <h2>EDITAR ATENCIÓN</h2>
-<form id="form">
-  <input id="id_empleado" type="number" required>
-  <input id="nombre_cliente" type="text" required>
-  <input id="producto" type="text" required>
-  <input id="monto" type="number" step="0.01" required>
-  <input id="fecha" type="date" required>
-  <button type="submit">GUARDAR CAMBIOS</button>
+
+<form id="form" style="max-width:420px;margin:24px auto;background:rgba(0,0,0,0.5);padding:16px;border-radius:8px">
+  <input id="id_empleado" type="number" required placeholder="Empleado">
+  <input id="nombre_cliente" type="text" required placeholder="Nombre cliente">
+  <input id="producto" type="text" required placeholder="Producto">
+  <input id="monto" type="number" step="0.01" required placeholder="Monto">
+  <input id="fecha" type="date" required placeholder="Fecha">
+  <button type="submit" style="margin-top:10px;padding:8px 12px;background:#4caf50;color:white;border:none;border-radius:6px">GUARDAR CAMBIOS</button>
 </form>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  const SUPABASE_URL = 'https://dclodqpggfezfqjzsrdx.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM'
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  import { supabase } from './js/supabaseClient.js'
 
   const params = new URLSearchParams(location.search)
   const id = params.get('id')
   const form = document.getElementById('form')
 
+  // Protege la página: sólo admin
+  (async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return window.location.href = 'login.html'
+
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error) throw error
+
+      if (!user?.app_metadata?.role || user.app_metadata.role !== 'admin') {
+        alert('Acceso restringido: solo administradores')
+        return window.location.href = 'index.html'
+      }
+    } catch (err) {
+      console.error('Protección error', err)
+      await supabase.auth.signOut()
+      window.location.href = 'login.html'
+    }
+  })()
+
   async function load(){
-    const { data, error } = await supabase.from('atenciones').select('*').eq('id_atencion', id).single()
-    if(error){ alert('Error: ' + error.message); console.error(error); return }
-    document.getElementById('id_empleado').value = data.id_empleado
-    document.getElementById('nombre_cliente').value = data.nombre_cliente
-    document.getElementById('producto').value = data.producto
-    document.getElementById('monto').value = data.monto
-    document.getElementById('fecha').value = data.fecha
+    try {
+      const { data, error } = await supabase.from('atenciones').select('*').eq('id_atencion', id).single()
+      if (error) throw error
+      document.getElementById('id_empleado').value = data.id_empleado
+      document.getElementById('nombre_cliente').value = data.nombre_cliente
+      document.getElementById('producto').value = data.producto
+      document.getElementById('monto').value = data.monto
+      document.getElementById('fecha').value = data.fecha
+    } catch (err) {
+      alert('Error al cargar datos: ' + (err.message || err))
+      console.error('Load error', err)
+    }
   }
 
   if (!form) {
@@ -37,23 +60,29 @@
   } else {
     form.addEventListener('submit', async (e)=>{
       e.preventDefault()
-      const id_empleado = parseInt(document.getElementById('id_empleado').value)
-      const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
-      const producto = document.getElementById('producto').value.trim()
-      const monto = parseFloat(document.getElementById('monto').value)
-      const fecha = document.getElementById('fecha').value
+      try {
+        const id_empleado = parseInt(document.getElementById('id_empleado').value)
+        const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
+        const producto = document.getElementById('producto').value.trim()
+        const monto = parseFloat(document.getElementById('monto').value)
+        const fecha = document.getElementById('fecha').value
 
-      const { error } = await supabase
-        .from('atenciones')
-        .update({ id_empleado, nombre_cliente, producto, monto, fecha })
-        .eq('id_atencion', id)
+        const { error } = await supabase
+          .from('atenciones')
+          .update({ id_empleado, nombre_cliente, producto, monto, fecha })
+          .eq('id_atencion', id)
 
-      if(error){ alert('Error: ' + error.message); console.error(error); return }
-      alert('Actualizado')
-      window.location.href = 'ver_atenciones.html'
+        if(error) throw error
+        alert('Actualizado')
+        window.location.href = 'ver_atenciones.html'
+      } catch (err) {
+        console.error('Update error', err)
+        alert('Error al actualizar: ' + (err.message || err))
+      }
     })
   }
 
+  // carga inicial
   load()
 </script>
 </body>

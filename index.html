@@ -7,33 +7,30 @@
 <link rel="icon" href="LOGO.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-/* tu CSS (resumido) */
+/* tu CSS resumido (mantén tu estilo original si quieres) */
 body{margin:0;font-family:'Montserrat',Arial,sans-serif;background:radial-gradient(circle,#2e7d32,#1b5e20);color:white;}
 header{padding:30px;background:rgba(0,0,0,0.5);text-align:center}
 .menu{background:rgba(0,0,0,0.7);padding:12px 0;text-align:center}
 .menu a{color:white;text-decoration:none;margin:0 25px;font-weight:600;letter-spacing:1px;cursor:pointer}
-.titulo-principal{font-family:'Playfair Display',serif;font-size:44px;letter-spacing:3px;text-decoration:underline;text-decoration-thickness:4px;text-decoration-color:#81c784;text-underline-offset:14px}
-.texto-contenedor{max-width:950px;margin:60px auto 0 auto;text-align:center;line-height:1.9}
-.productos{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;margin-top:40px}
-.producto{background:rgba(255,255,255,0.12);border-radius:12px;padding:14px}
-.producto img{width:100%;height:90px;object-fit:contain;background-color:#2e7d32;border-radius:10px}
-.boton{display:inline-block;margin:6px;padding:8px 14px;background:#4caf50;color:white;text-decoration:none;border-radius:6px;font-size:14px;border:none;cursor:pointer}
-.boton:hover{background:#66bb6a}
-.descripcion{display:none;font-size:13px;margin-top:8px;line-height:1.5}
 footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center}
 </style>
 </head>
 <body>
 
-<!-- Protegemos la página: si no hay sesión redirige a login -->
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
+
   (async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       window.location.href = 'login.html'
       return
     }
+
+    // opcional: mostrar info de usuario en consola
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error) console.warn('getUser warning', error)
+    console.log('Usuario activo:', user?.email, 'role(app_metadata):', user?.app_metadata?.role)
   })()
 </script>
 
@@ -51,51 +48,61 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
     <a id="logoutBtn" style="float:right;margin-right:20px;cursor:pointer;">Cerrar sesión</a>
 </nav>
 
-<section id="inicio" class="inicio">
-<h2 class="titulo-principal">BIENVENIDOS A AGRÍCOLA NET</h2>
-<div class="texto-contenedor">
-  <p class="texto-intro">EN AGRÍCOLA NET SE ESPECIALIZA EN LA COMERCIALIZACIÓN DE PRODUCTOS AGRÍCOLAS...</p>
-</div>
+<section id="inicio" style="padding:60px;text-align:center">
+  <h2>BIENVENIDOS A AGRÍCOLA NET</h2>
+  <p style="max-width:900px;margin:18px auto;line-height:1.8">EN AGRÍCOLA NET SE ESPECIALIZA EN LA COMERCIALIZACIÓN DE PRODUCTOS AGRÍCOLAS...</p>
 </section>
 
-<section id="productos">
-<h2>NUESTROS PRODUCTOS</h2>
-<div class="productos" id="productos-container"></div>
+<section id="productos" style="padding:40px">
+  <h2 style="text-align:center">NUESTROS PRODUCTOS</h2>
+  <div id="productos-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;max-width:1100px;margin:18px auto"></div>
 </section>
 
 <footer>
-<p>© 2026 AGRÍCOLA NET – Todos los derechos reservados</p>
+  <p>© 2026 AGRÍCOLA NET – Todos los derechos reservados</p>
 </footer>
 
 <script>
-// productos (tu lista original)
 const lista = [
-["Maíz","maiz.png","maiz.pdf"],["Frijol","frijol.png","maiz.pdf"],["Arroz","arroz.png","maiz.pdf"],
-["Trigo","trigo.png","maiz.pdf"],["Cebada","cebada.png","maiz.pdf"],["Avena","avena.png","maiz.pdf"],
-["Sorgo","sorgo.png","maiz.pdf"],["Alfalfa","alfalfa.png","maiz.pdf"],["Garbanzo","garbanzo.png","maiz.pdf"],
-["Lenteja","lenteja.png","maiz.pdf"],["Chía","chia.png","maiz.pdf"],["Ajonjolí","ajonjoli.png","maiz.pdf"],
-["Semilla de Girasol","girasol.png","maiz.pdf"],["Harina de Maíz","harina.png","maiz.pdf"],["Forraje","forraje.png","maiz.pdf"]
+  ["Maíz","maiz.png","maiz.pdf"],["Frijol","frijol.png","maiz.pdf"],["Arroz","arroz.png","maiz.pdf"],
+  ["Trigo","trigo.png","maiz.pdf"],["Cebada","cebada.png","maiz.pdf"],["Avena","avena.png","maiz.pdf"],
+  ["Sorgo","sorgo.png","maiz.pdf"],["Alfalfa","alfalfa.png","maiz.pdf"],["Garbanzo","garbanzo.png","maiz.pdf"],
+  ["Lenteja","lenteja.png","maiz.pdf"],["Chía","chia.png","maiz.pdf"],["Ajonjolí","ajonjoli.png","maiz.pdf"],
+  ["Semilla de Girasol","girasol.png","maiz.pdf"],["Harina de Maíz","harina.png","maiz.pdf"],["Forraje","forraje.png","maiz.pdf"]
 ];
 
 const container = document.getElementById('productos-container')
 if (container) {
   container.innerHTML = lista.map((p,i)=>`
-    <div class="producto">
-      <img src="${p[1]}" alt="${p[0]}">
+    <div style="background:rgba(255,255,255,0.08);padding:12px;border-radius:8px;text-align:center">
+      <img src="${p[1]}" alt="${p[0]}" style="width:100%;height:90px;object-fit:contain;background:#2e7d32;border-radius:6px">
       <h4>${p[0]}</h4>
-      <a class="boton" href="https://wa.me/521XXXXXXXXXX">Comprar</a>
-      <a class="boton" href="${p[2]}" target="_blank">Ficha</a>
-      <button class="boton" onclick="toggle('d${i}')">Descripción</button>
-      <p id="d${i}" class="descripcion">${p[0]} agrícola de alta calidad...</p>
+      <div style="margin-top:8px">
+        <a class="boton" href="https://wa.me/521XXXXXXXXXX" style="display:inline-block;margin:4px;padding:8px 10px;background:#4caf50;color:white;border-radius:6px;text-decoration:none">Comprar</a>
+        <a class="boton" href="${p[2]}" target="_blank" style="display:inline-block;margin:4px;padding:8px 10px;background:#4caf50;color:white;border-radius:6px;text-decoration:none">Ficha</a>
+      </div>
     </div>
   `).join('')
 }
 
-function toggle(id){ const d=document.getElementById(id); if(d) d.style.display = d.style.display === "block" ? "none" : "block"; }
-function scrollLento(id){ const destino=document.getElementById(id); if(!destino) return; const inicio=window.scrollY; const fin=destino.getBoundingClientRect().top + inicio; const duracion=1200; let start=null; function animar(t){ if(!start) start=t; const progreso=t-start; const avance=Math.min(progreso/duracion,1); window.scrollTo(0, inicio + (fin-inicio)*avance); if(avance<1) requestAnimationFrame(animar);} requestAnimationFrame(animar); }
+function scrollLento(id){
+  const destino=document.getElementById(id)
+  if(!destino) return
+  const inicio=window.scrollY
+  const fin=destino.getBoundingClientRect().top + inicio
+  const duracion=800
+  let start=null
+  function animar(t){
+    if(!start) start=t
+    const progreso=(t-start)/duracion
+    const avance=Math.min(progreso,1)
+    window.scrollTo(0, inicio + (fin-inicio)*avance)
+    if(avance<1) requestAnimationFrame(animar)
+  }
+  requestAnimationFrame(animar)
+}
 </script>
 
-<!-- Logout handler (importa el cliente y añade el listener) -->
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
   const btn = document.getElementById('logoutBtn')
@@ -106,7 +113,6 @@ function scrollLento(id){ const destino=document.getElementById(id); if(!destino
       } catch (err) {
         console.error('Logout error', err)
       } finally {
-        // redirigir siempre
         window.location.href = 'login.html'
       }
     })

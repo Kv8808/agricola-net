@@ -16,8 +16,8 @@
 <body>
 
 <h2>LISTA DE ATENCIONES</h2>
-
 <div id="table-wrap"></div>
+
 <div class="pagination">
   <button id="prev">Anterior</button>
   <span id="pageInfo"></span>
@@ -29,16 +29,26 @@
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
 
-  // Proteger la página
+  // Protege la página: sólo admin
   (async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return window.location.href = 'login.html'
+
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error) throw error
+
+      if (!user?.app_metadata?.role || user.app_metadata.role !== 'admin') {
+        alert('Acceso restringido: solo administradores')
+        return window.location.href = 'index.html'
+      }
+    } catch (err) {
+      console.error('Protección error', err)
+      await supabase.auth.signOut()
       window.location.href = 'login.html'
-      return
     }
   })()
 
-  // Lógica paginación y carga
   let page = 1, limit = 10
   const tableWrap = document.getElementById('table-wrap')
   const pageInfo = document.getElementById('pageInfo')
