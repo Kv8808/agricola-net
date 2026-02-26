@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ver Atenciones</title>
+<style>
+body{font-family:Arial;background:#1b5e20;color:white;text-align:center}
+table{margin:30px auto;border-collapse:collapse;width:90%}
+th, td{border:1px solid white;padding:8px}
+a{color:#81c784;text-decoration:none;font-weight:bold}
+.pagination{margin: 16px;}
+.button{background:#4caf50;color:white;padding:6px 10px;border-radius:6px;text-decoration:none}
+</style>
+</head>
+<body>
+<h2>LISTA DE ATENCIONES</h2>
+
+<div id="table-wrap"></div>
+<div class="pagination">
+  <button id="prev">Anterior</button>
+  <span id="pageInfo"></span>
+  <button id="next">Siguiente</button>
+</div>
+
+<a href="index.html">Volver al inicio</a>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co'
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  let page = 1, limit = 10
+
+  const tableWrap = document.getElementById('table-wrap')
+  const pageInfo = document.getElementById('pageInfo')
+  const prevBtn = document.getElementById('prev')
+  const nextBtn = document.getElementById('next')
+
+  async function load() {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    const { data, error, count } = await supabase
+      .from('atenciones')
+      .select('*', { count: 'exact' })
+      .order('fecha', { ascending: false })
+      .range(from, to)
+
+    if (error) {
+      tableWrap.innerHTML = '<p>Error: ' + error.message + '</p>'
+      return
+    }
+
+    const total = count || 0
+    const pages = Math.max(1, Math.ceil(total / limit))
+    pageInfo.textContent = `Página ${page} de ${pages} - Total: ${total}`
+
+    const rows = data.map(row => `
+      <tr>
+        <td>${row.id_atencion}</td>
+        <td>${row.id_empleado}</td>
+        <td>${escapeHtml(row.nombre_cliente)}</td>
+        <td>${escapeHtml(row.producto)}</td>
+        <td>${row.monto}</td>
+        <td>${row.fecha}</td>
+        <td>
+          <a class="button" href="editar_atencion.html?id=${row.id_atencion}">Editar</a>
+          <a class="button" data-id="${row.id_atencion}" href="#" onclick="del(event)">Eliminar</a>
+        </td>
+      </tr>
+    `).join('')
+
+    tableWrap.innerHTML = `
+      <table>
+        <tr>
+          <th>ID</th><th>Empleado</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Fecha</th><th>Acciones</th>
+        </tr>
+        ${rows}
+      </table>
+    `
+    prevBtn.disabled = page <= 1
+    nextBtn.disabled = page >= pages
+  }
+
+  function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+
+  prevBtn.addEventListener('click', ()=>{ page--; load() })
+  nextBtn.addEventListener('click', ()=>{ page++; load() })
+
+  window.del = async function(e){
+    e.preventDefault()
+    const id = e.currentTarget.getAttribute('data-id')
+    if(!confirm('Eliminar registro #' + id + '?')) return
+    const { error } = await supabase.from('atenciones').delete().eq('id_atencion', id)
+    if(error) { alert('Error al eliminar: ' + error.message); return }
+    alert('Eliminado')
+    load()
+  }
+
+  load()
+</script>
+</body>
+</html>

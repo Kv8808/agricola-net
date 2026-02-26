@@ -1,0 +1,21 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Registro</title></head><body>
+<h2>Registro</h2>
+<form id="f">
+  <input id="email" type="email" placeholder="Email" required>
+  <input id="pass" type="password" placeholder="Contraseña" required>
+  <button>Registrar</button>
+</form>
+<script type="module">
+ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+ const supabase = createClient('https://YOUR_SUPABASE_URL.supabase.co','YOUR_SUPABASE_ANON_KEY')
+ document.getElementById('f').addEventListener('submit', async e=>{
+   e.preventDefault()
+   const email = document.getElementById('email').value
+   const pass = document.getElementById('pass').value
+   const { data, error } = await supabase.auth.signUp({ email, password: pass })
+   if(error) return alert(error.message)
+   alert('Revisa tu email para confirmar. Luego inicia sesión.')
+   window.location.href = 'login.html'
+ })
+</script>
+</body></html>

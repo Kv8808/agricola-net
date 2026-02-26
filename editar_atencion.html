@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Editar Atención</title></head>
+<body style="font-family:Arial;background:#2e7d32;color:white;text-align:center">
+<h2>EDITAR ATENCIÓN</h2>
+<form id="form">
+  <input id="id_empleado" type="number" required>
+  <input id="nombre_cliente" type="text" required>
+  <input id="producto" type="text" required>
+  <input id="monto" type="number" step="0.01" required>
+  <input id="fecha" type="date" required>
+  <button type="submit">GUARDAR CAMBIOS</button>
+</form>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co'
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  const params = new URLSearchParams(location.search)
+  const id = params.get('id')
+  const form = document.getElementById('form')
+
+  async function load(){
+    const { data, error } = await supabase.from('atenciones').select('*').eq('id_atencion', id).single()
+    if(error){ alert('Error: ' + error.message); return }
+    document.getElementById('id_empleado').value = data.id_empleado
+    document.getElementById('nombre_cliente').value = data.nombre_cliente
+    document.getElementById('producto').value = data.producto
+    document.getElementById('monto').value = data.monto
+    document.getElementById('fecha').value = data.fecha
+  }
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault()
+    const id_empleado = parseInt(document.getElementById('id_empleado').value)
+    const nombre_cliente = document.getElementById('nombre_cliente').value.trim()
+    const producto = document.getElementById('producto').value.trim()
+    const monto = parseFloat(document.getElementById('monto').value)
+    const fecha = document.getElementById('fecha').value
+
+    const { error } = await supabase
+      .from('atenciones')
+      .update({ id_empleado, nombre_cliente, producto, monto, fecha })
+      .eq('id_atencion', id)
+
+    if(error){ alert('Error: ' + error.message); return }
+    alert('Actualizado')
+    window.location.href = 'ver_atenciones.html'
+  })
+
+  load()
+</script>
+</body>
+</html>
