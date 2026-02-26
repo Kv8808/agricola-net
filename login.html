@@ -4,35 +4,209 @@
   <meta charset="utf-8">
   <title>Login - AGRÍCOLA NET</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --bg:#f6f6f6;
+      --card:#ffffff;
+      --accent:#2e7d32;
+      --muted:#6b6b6b;
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #e9f5ec 0%, var(--bg) 100%);
+      color:#111;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .container{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,0.08);
+      padding:22px;
+    }
+
+    h1{margin:0 0 12px;font-size:1.25rem;color:var(--accent);text-align:center}
+    p.lead{margin:0 0 18px;text-align:center;color:var(--muted)}
+
+    form{display:flex;flex-direction:column;gap:10px}
+    label{font-size:0.85rem;color:#333;margin-bottom:6px;display:block}
+    input[type="email"], input[type="password"]{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(0,0,0,0.08);
+      background:transparent;
+      outline:none;
+      font-size:1rem;
+    }
+
+    .row{display:flex;gap:8px;align-items:center}
+    .row .flex{flex:1}
+    .show-pass{
+      background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;font-size:0.9rem;
+    }
+
+    button[type="submit"]{
+      background:var(--accent);
+      color:white;
+      border:0;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:6px;
+    }
+    button[disabled]{opacity:0.6;cursor:not-allowed}
+
+    .links{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:0.95rem}
+    .links a{color:var(--accent);text-decoration:none;font-weight:600}
+    .error{
+      background:#ffdede;color:#6b0000;padding:8px 10px;border-radius:8px;margin-top:6px;font-size:0.95rem;
+      display:none;
+    }
+    .success{
+      background:#e6fff0;color:#006936;padding:8px 10px;border-radius:8px;margin-top:6px;font-size:0.95rem;
+      display:none;
+    }
+
+    
+    @media (max-width:420px){
+      .container{padding:16px}
+      h1{font-size:1.05rem}
+    }
+  </style>
 </head>
-<body style="font-family:Arial; text-align:center; padding:40px; background:#f6f6f6;">
-  <h2>Login</h2>
+<body>
+  <div class="container" role="main" aria-labelledby="title">
+    <h1 id="title">Login — AGRÍCOLA NET</h1>
+    <p class="lead">Ingresa con tu correo para continuar</p>
 
-  <form id="f" style="max-width:360px;margin:0 auto;">
-    <input id="email" type="email" required placeholder="Email" style="width:100%;padding:8px;margin:8px 0">
-    <input id="pass" type="password" required placeholder="Contraseña" style="width:100%;padding:8px;margin:8px 0">
-    <button type="submit" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:4px;cursor:pointer">Ingresar</button>
-  </form>
+    <div id="msgError" class="error" role="alert"></div>
+    <div id="msgSuccess" class="success" role="status"></div>
 
-  <p style="margin-top:12px;"><a href="signup.html">¿No tienes cuenta? Regístrate</a></p>
+    <form id="f" autocomplete="on" novalidate>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="tu@correo.com" required>
+      </div>
+
+      <div>
+        <label for="pass">Contraseña</label>
+        <div class="row">
+          <input id="pass" name="password" type="password" placeholder="••••••••" required class="flex" minlength="6">
+          <button type="button" class="show-pass" id="togglePass" aria-label="Mostrar contraseña">Mostrar</button>
+        </div>
+      </div>
+
+      <button type="submit" id="btnSubmit">Ingresar</button>
+
+      <div class="links">
+        <a href="signup.html">¿No tienes cuenta? Regístrate</a>
+        <a href="index.html">Volver</a>
+      </div>
+    </form>
+  </div>
 
   <script type="module">
     import { supabase } from './js/supabaseClient.js'
 
     const form = document.getElementById('f')
+    const emailInput = document.getElementById('email')
+    const passInput = document.getElementById('pass')
+    const btn = document.getElementById('btnSubmit')
+    const toggle = document.getElementById('togglePass')
+    const msgError = document.getElementById('msgError')
+    const msgSuccess = document.getElementById('msgSuccess')
+
+    
+    ;(async function checkSession(){
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          
+          window.location.href = 'index.html'
+        }
+      } catch (err) {
+        console.warn('checkSession error', err)
+      }
+    })()
+
+    
+    toggle.addEventListener('click', () => {
+      if (passInput.type === 'password') {
+        passInput.type = 'text'
+        toggle.textContent = 'Ocultar'
+        toggle.setAttribute('aria-pressed', 'true')
+      } else {
+        passInput.type = 'password'
+        toggle.textContent = 'Mostrar'
+        toggle.setAttribute('aria-pressed', 'false')
+      }
+      passInput.focus()
+    })
+
+    function showError(msg){
+      msgSuccess.style.display = 'none'
+      msgError.textContent = msg
+      msgError.style.display = 'block'
+    }
+    function showSuccess(msg){
+      msgError.style.display = 'none'
+      msgSuccess.textContent = msg
+      msgSuccess.style.display = 'block'
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
-      const email = document.getElementById('email').value.trim()
-      const password = document.getElementById('pass').value
+      msgError.style.display = 'none'
+      msgSuccess.style.display = 'none'
+
+      const email = emailInput.value.trim()
+      const password = passInput.value
+
+      if (!email || !password) {
+        showError('Completa email y contraseña.')
+        return
+      }
+
+      
+      const emailRE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRE.test(email)) {
+        showError('Email inválido.')
+        return
+      }
+
+      btn.disabled = true
+      btn.textContent = 'Ingresando...'
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-        // Login correcto
-        window.location.href = 'index.html'
+        if (error) {
+          
+          showError(error.message || 'Error al iniciar sesión')
+          console.error('Login error', error)
+          return
+        }
+
+        
+        showSuccess('Login correcto. Redirigiendo...')
+        
+        setTimeout(()=> window.location.href = 'index.html', 600)
       } catch (err) {
-        alert(err.message || 'Error al iniciar sesión')
-        console.error('Login error', err)
+        console.error('Unexpected login error', err)
+        showError(err.message || 'Error inesperado al iniciar sesión')
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Ingresar'
       }
     })
   </script>

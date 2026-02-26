@@ -1,11 +1,11 @@
-// routes/atenciones.routes.js
+
 const router = require('express').Router();
 const controller = require('../controllers/atenciones.controller');
 const auth = require('../middleware/auth.middleware');
 const { body, query } = require('express-validator');
 const validate = require('../middleware/validator.middleware');
 
-// GET /api/atenciones?page=&limit=&search=&date_from=&date_to=&sort=
+
 router.get('/',
   auth,
   [
@@ -20,7 +20,7 @@ router.get('/',
   controller.getAll
 );
 
-// CREATE
+
 router.post('/',
   auth,
   [
@@ -34,7 +34,7 @@ router.post('/',
   controller.create
 );
 
-// UPDATE
+
 router.put('/:id',
   auth,
   [
@@ -48,7 +48,7 @@ router.put('/:id',
   controller.update
 );
 
-// DELETE (only admin)
+
 router.delete('/:id',
   auth,
   auth.verifyRole('admin'),

@@ -1,4 +1,4 @@
-// server.js
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -12,11 +12,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// rutas
+
 app.use('/api/auth', authRoutes);
 app.use('/api/atenciones', atencionesRoutes);
 
-// middleware errores (último)
+
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 4000;

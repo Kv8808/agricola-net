@@ -2,40 +2,84 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Registrar Atención</title>
+<title>Registrar Atención — AGRÍCOLA NET</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="LOGO.png" type="image/png">
 <style>
-  body{font-family:Arial;background:#2e7d32;color:white;text-align:center;padding:24px}
-  form{background:rgba(0,0,0,0.5);width:100%;max-width:420px;margin:24px auto;padding:20px;border-radius:10px}
-  input, select, button{width:100%;padding:8px;margin:8px 0;box-sizing:border-box}
-  button{background:#4caf50;color:white;border:none;cursor:pointer;border-radius:6px}
-  button:hover{background:#66bb6a}
+  :root{
+    --bg:#2e7d32;
+    --panel: rgba(0,0,0,0.55);
+    --accent:#81c784;
+    --btn:#4caf50;
+    --muted:rgba(255,255,255,0.88);
+    --radius:12px;
+  }
+  body{margin:0;font-family:Inter, "Segoe UI", Arial, sans-serif;background:var(--bg);color:white;padding:18px;box-sizing:border-box}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  header h2{margin:0;font-size:1.05rem}
+  .card{background:var(--panel);padding:16px;border-radius:var(--radius);max-width:520px;margin:0 auto;box-shadow:0 6px 18px rgba(0,0,0,0.3)}
+  form{display:flex;flex-direction:column;gap:10px}
+  label{font-size:0.9rem;color:var(--muted);display:block}
+  select,input{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:white;outline:none}
+  .row{display:flex;gap:10px}
+  .row .half{flex:1}
+  .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+  .btn{background:var(--btn);border:0;color:white;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.08)}
+  .muted{color:rgba(255,255,255,0.8);font-size:0.9rem}
+  @media (max-width:520px){
+    .row{flex-direction:column}
+  }
+  .notice{font-size:0.9rem;color:rgba(255,255,255,0.75);margin-bottom:8px}
 </style>
 </head>
 <body>
 
-<h2>REGISTRAR ATENCIÓN</h2>
+<header>
+  <h2>REGISTRAR ATENCIÓN</h2>
+  <a href="index.html" class="muted">Volver</a>
+</header>
 
-<form id="form">
-  <select id="id_empleado" required>
-    <option value="">SELECCIONA EMPLEADO</option>
-    <option value="1">Juan Pérez</option>
-    <option value="2">María López</option>
-    <option value="3">Carlos Gómez</option>
-  </select>
+<div class="card">
+  <div class="notice">Solo administradores pueden registrar atenciones. Asegúrate de iniciar sesión.</div>
 
-  <input id="nombre_cliente" type="text" placeholder="Nombre del cliente" required>
-  <input id="producto" type="text" placeholder="Producto" required>
-  <input id="monto" type="number" step="0.01" placeholder="Monto" required>
-  <input id="fecha" type="date" required>
+  <form id="form" autocomplete="off">
+    <label for="id_empleado">Empleado</label>
+    <select id="id_empleado" required>
+      <option value="">Selecciona empleado</option>
+      <option value="1">Juan Pérez</option>
+      <option value="2">María López</option>
+      <option value="3">Carlos Gómez</option>
+    </select>
 
-  <button type="submit">REGISTRAR</button>
-</form>
+    <label for="nombre_cliente">Nombre del cliente</label>
+    <input id="nombre_cliente" type="text" placeholder="Nombre del cliente" required>
+
+    <label for="producto">Producto</label>
+    <input id="producto" type="text" placeholder="Producto" required>
+
+    <div class="row">
+      <div class="half">
+        <label for="monto">Monto (MXN)</label>
+        <input id="monto" type="number" step="0.01" placeholder="0.00" required>
+      </div>
+      <div class="half">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" required>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="btnCancel" class="btn ghost">Cancelar</button>
+      <button type="submit" class="btn">Registrar</button>
+    </div>
+  </form>
+</div>
 
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
 
-  // Protege la página: sólo admin
+  // PROTECCIÓN: solo admin
   (async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -43,19 +87,23 @@
 
       const { data: { user }, error } = await supabase.auth.getUser()
       if (error) throw error
-
-      if (!user?.app_metadata?.role || user.app_metadata.role !== 'admin') {
+      const role = user?.app_metadata?.role || user?.raw_app_meta_data?.role || user?.user_metadata?.role
+      if (role !== 'admin') {
         alert('Acceso restringido: solo administradores')
         return window.location.href = 'index.html'
       }
     } catch (err) {
       console.error('Protección error', err)
-      await supabase.auth.signOut()
+      try { await supabase.auth.signOut() } catch(e){}
       window.location.href = 'login.html'
     }
   })()
 
   const form = document.getElementById('form')
+  const btnCancel = document.getElementById('btnCancel')
+
+  btnCancel.addEventListener('click', ()=> window.location.href = 'index.html')
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     try {
@@ -68,12 +116,12 @@
       const monto = parseFloat(document.getElementById('monto').value)
       const fecha = document.getElementById('fecha').value
 
-      if (!nombre_cliente || !producto || isNaN(monto) || !fecha) {
+      if (!id_empleado || !nombre_cliente || !producto || isNaN(monto) || !fecha) {
         alert('Rellena todos los campos correctamente.')
         return
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('atenciones')
         .insert([{
           id_empleado,
@@ -93,5 +141,6 @@
     }
   })
 </script>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
-// middleware/auth.middleware.js
+
 const jwt = require('jsonwebtoken');
 
 const jwtSecret = process.env.JWT_SECRET || 'clave_super_secreta';
@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     }
     const token = header.split(' ')[1];
     const decoded = jwt.verify(token, jwtSecret);
-    // decoded expected: { id: <userId>, role: 'admin' | 'user', iat, exp }
+    
     req.user = decoded;
     next();
   } catch (err) {
@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
   }
 };
 
-// helper middleware to check role
+
 module.exports.verifyRole = (requiredRole) => {
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ message: 'No autorizado' });

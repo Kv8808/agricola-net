@@ -1,4 +1,4 @@
-// middleware/error.middleware.js
+
 module.exports = (err, req, res, next) => {
   console.error('ERROR_HANDLER:', err);
   res.status(err.status || 500).json({

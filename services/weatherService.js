@@ -25,9 +25,9 @@ async function obtenerClima(ciudad) {
 
     } catch (error) {
         if (error.response) {
-            throw new Error("Ciudad no encontrada o error en API externa");
+            throw new Error("ciudad no encontrada o error en api externa");
         } else {
-            throw new Error("Error de conexión con servicio climático");
+            throw new Error("error de conexión con servicio climático");
         }
     }
 }

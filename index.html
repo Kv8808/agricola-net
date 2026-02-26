@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-/* ====== tu CSS original (con overrides responsivos al final) ====== */
+
 body{margin:0;font-family:'Montserrat',Arial,sans-serif;background:radial-gradient(circle,#2e7d32,#1b5e20);color:white;}
 header{padding:30px;background:rgba(0,0,0,0.5);text-align:center}
 .menu{background:rgba(0,0,0,0.7);padding:12px 0;text-align:center;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
@@ -16,18 +16,18 @@ header{padding:30px;background:rgba(0,0,0,0.5);text-align:center}
 .menu .right{margin-left:auto;margin-right:16px}
 footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center}
 
-/* small widget and grid */
+
 .fx-widget{max-width:1100px;margin:12px auto;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.06);border-radius:8px}
 .fx-widget .left{font-size:16px}
 .fx-widget .right{font-size:14px;color:#dff0d8}
 
-/* products grid adjustments (keeps your style but responsive) */
+
 #productos-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;max-width:1100px;margin:18px auto;padding:0 12px}
 .product-card{background:rgba(255,255,255,0.08);padding:12px;border-radius:8px;text-align:center}
 .product-card img{width:100%;height:90px;object-fit:contain;background:#2e7d32;border-radius:6px}
 .boton{display:inline-block;margin:4px;padding:8px 10px;background:#4caf50;color:white;border-radius:6px;text-decoration:none}
 
-/* small screens */
+
 @media (max-width: 720px){
   header{padding:18px}
   .menu{justify-content:space-between;padding:10px 8px}
@@ -42,7 +42,7 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
 </head>
 <body>
 
-<!-- ===== existing auth check: mantenido exactamente ===== -->
+
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
 
@@ -53,7 +53,7 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
       return
     }
 
-    // opcional: mostrar info de usuario en consola
+   
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) console.warn('getUser warning', error)
     console.log('Usuario activo:', user?.email, 'role(app_metadata):', user?.app_metadata?.role)
@@ -66,7 +66,7 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
     <p>Distribución y venta de productos agrícolas</p>
 </header>
 
-<!-- FX widget: aquí mostramos la API externa (USD->MXN) y acceso rápido a clima -->
+
 <div id="fx-widget" class="fx-widget" aria-live="polite">
   <div class="left">
     <strong id="fx-text">Cargando cotización USD → MXN...</strong>
@@ -104,7 +104,7 @@ footer{background:rgba(0,0,0,0.6);padding:25px;margin-top:60px;text-align:center
 </footer>
 
 <script>
-/* tu lista de productos (sin cambios) */
+
 const lista = [
   ["Maíz","maiz.png","maiz.pdf"],["Frijol","frijol.png","maiz.pdf"],["Arroz","arroz.png","maiz.pdf"],
   ["Trigo","trigo.png","maiz.pdf"],["Cebada","cebada.png","maiz.pdf"],["Avena","avena.png","maiz.pdf"],
@@ -145,7 +145,7 @@ function scrollLento(id){
 }
 </script>
 
-<!-- logout handler (mantengo tu implementación) -->
+
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
   const btn = document.getElementById('logoutBtn')
@@ -164,14 +164,13 @@ function scrollLento(id){
   }
 </script>
 
-<!-- ========== Aquí integramos la API externa (módulo) ========== -->
+
 <script type="module">
-  // IMPORTANTE: este archivo debe existir en /js/external-api.js
-  // (si no existe, verás error en consola; abajo te indico cómo crear el archivo)
+
   try {
     const mod = await import('./js/external-api.js')
 
-    // función para actualizar la cotización en la UI
+    
     async function updateFx() {
       const fxText = document.getElementById('fx-text')
       const fxDate = document.getElementById('fx-date')
@@ -194,7 +193,7 @@ function scrollLento(id){
       }
     }
 
-    // busca clima por ciudad y muestra en el widget pequeño (reemplaza texto)
+    
     async function searchWeather(city) {
       const out = document.getElementById('fx-text')
       if (!city) { out.textContent = 'Ingrese ciudad para clima'; return }
@@ -210,12 +209,12 @@ function scrollLento(id){
         out.textContent = 'Error clima: ' + (err.message || err)
         console.error('searchWeather err', err)
       } finally {
-        // restaurar cotización después de 6s
+        
         setTimeout(updateFx, 6000)
       }
     }
 
-    // inicializa
+    
     updateFx()
     document.getElementById('city-btn').addEventListener('click', ()=> {
       const c = document.getElementById('city-input').value.trim()
@@ -227,7 +226,7 @@ function scrollLento(id){
 
   } catch (err) {
     console.error('No se pudo cargar ./js/external-api.js — revisa que exista.', err)
-    // mostrar error visible
+    
     const fxText = document.getElementById('fx-text')
     if (fxText) fxText.textContent = 'API externa no cargada (falta /js/external-api.js)'
   }

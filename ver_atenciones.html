@@ -2,116 +2,296 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Ver Atenciones</title>
+<title>Ver Atenciones — AGRÍCOLA NET</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="LOGO.png" type="image/png">
 <style>
-  body{font-family:Arial;background:#1b5e20;color:white;text-align:center;padding:20px}
-  table{margin:20px auto;border-collapse:collapse;width:95%;max-width:1000px}
-  th, td{border:1px solid white;padding:8px}
-  a{color:#81c784;text-decoration:none;font-weight:bold}
-  .pagination{margin:12px}
-  .button{background:#4caf50;color:white;padding:6px 10px;border-radius:6px;text-decoration:none;display:inline-block}
+  :root{
+    --bg:#1b5e20;
+    --panel: rgba(255,255,255,0.06);
+    --accent:#81c784;
+    --btn:#4caf50;
+    --muted: rgba(255,255,255,0.85);
+    --card-radius:12px;
+    --gap:12px;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+  }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:white;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:18px;
+    box-sizing:border-box;
+  }
+
+  header{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  header h1{margin:0;font-size:1.1rem}
+  .top-actions{display:flex;gap:8px;align-items:center}
+  .btn {
+    background:var(--btn);
+    border:0;
+    color:white;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn.ghost{ background:transparent;border:1px solid rgba(255,255,255,0.08); }
+  .search-row{display:flex;gap:8px;align-items:center;margin:8px 0 14px;}
+  .search-row input, .search-row select {
+    padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:white;outline:none
+  }
+  .panel{
+    background:var(--panel);
+    padding:12px;
+    border-radius:var(--card-radius);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:8px;
+    color:var(--muted);
+  }
+  table thead th{
+    text-align:left;font-size:0.85rem;padding:10px 8px;color:rgba(255,255,255,0.9);border-bottom:1px solid rgba(255,255,255,0.06)
+  }
+  table tbody td{
+    padding:10px 8px;border-bottom:1px dashed rgba(255,255,255,0.04);vertical-align:middle;font-size:0.95rem
+  }
+  .actions .small-btn {
+    background:transparent;border:1px solid rgba(255,255,255,0.08);padding:6px 8px;border-radius:8px;color:white;text-decoration:none;margin-right:6px;cursor:pointer;font-size:0.85rem
+  }
+
+  .pagination{
+    display:flex;gap:8px;align-items:center;justify-content:center;margin-top:14px;
+  }
+  .page-info{color:rgba(255,255,255,0.85);font-size:0.95rem}
+
+  
+  @media (max-width:720px){
+    table{display:none}
+    .card-list{display:block;margin-top:8px}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      padding:12px;border-radius:12px;margin-bottom:10px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .card .row{display:flex;justify-content:space-between;font-size:0.95rem}
+    .card .meta{display:flex;gap:8px;flex-wrap:wrap;color:rgba(255,255,255,0.85)}
+    .actions{display:flex;gap:8px;margin-top:8px}
+  }
+
+  
+  .card-list{display:none}
+
+  
+  .muted{color:rgba(255,255,255,0.7);font-size:0.9rem}
+  .danger{color:#ffb4a2}
 </style>
 </head>
 <body>
 
-<h2>LISTA DE ATENCIONES</h2>
-<div id="table-wrap"></div>
+<header>
+  <div>
+    <h1>LISTA DE ATENCIONES</h1>
+    <div class="muted" id="userLabel">Cargando usuario…</div>
+  </div>
+  <div class="top-actions">
+    <button class="btn" id="btnRefresh">Recargar</button>
+    <a class="btn ghost" href="index.html">Volver</a>
+  </div>
+</header>
 
-<div class="pagination">
-  <button id="prev">Anterior</button>
-  <span id="pageInfo"></span>
-  <button id="next">Siguiente</button>
+<div class="panel">
+  <div class="search-row">
+    <input id="qSearch" placeholder="Buscar por cliente o producto..." />
+    <input id="dateFrom" type="date" />
+    <input id="dateTo" type="date" />
+    <select id="perPage" title="Registros por página">
+      <option value="5">5 / pág</option>
+      <option value="10" selected>10 / pág</option>
+      <option value="20">20 / pág</option>
+    </select>
+    <button class="btn" id="btnSearch">Filtrar</button>
+  </div>
+
+  
+  <div id="tableWrap" style="overflow:auto">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>ID</th><th>Empleado</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Fecha</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  
+  <div class="card-list" id="cardList"></div>
+
+  <div class="pagination" style="margin-top:12px">
+    <button class="btn ghost" id="prev">Anterior</button>
+    <div class="page-info" id="pageInfo">Página 1</div>
+    <button class="btn ghost" id="next">Siguiente</button>
+  </div>
 </div>
-
-<p><a href="index.html">Volver al inicio</a></p>
 
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
 
-  // Protege la página: sólo admin
-  (async () => {
+  
+  const userLabel = document.getElementById('userLabel')
+  async function checkAdminOrRedirect(){
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return window.location.href = 'login.html'
 
       const { data: { user }, error } = await supabase.auth.getUser()
       if (error) throw error
-
-      if (!user?.app_metadata?.role || user.app_metadata.role !== 'admin') {
-        alert('Acceso restringido: solo administradores')
+      const role = user?.app_metadata?.role || user?.raw_app_meta_data?.role || user?.user_metadata?.role
+      userLabel.textContent = user?.email + (role ? (' — ' + role) : '')
+      if (role !== 'admin') {
+        alert('Acceso restringido: solo administradores');
         return window.location.href = 'index.html'
       }
-    } catch (err) {
+      return user
+    } catch (err){
       console.error('Protección error', err)
-      await supabase.auth.signOut()
+      try { await supabase.auth.signOut() } catch(e){}
       window.location.href = 'login.html'
     }
-  })()
+  }
 
-  let page = 1, limit = 10
-  const tableWrap = document.getElementById('table-wrap')
+  
+  const tbody = document.getElementById('tbody')
+  const cardList = document.getElementById('cardList')
   const pageInfo = document.getElementById('pageInfo')
   const prevBtn = document.getElementById('prev')
   const nextBtn = document.getElementById('next')
+  const btnRefresh = document.getElementById('btnRefresh')
+  const btnSearch = document.getElementById('btnSearch')
+  const qSearch = document.getElementById('qSearch')
+  const dateFrom = document.getElementById('dateFrom')
+  const dateTo = document.getElementById('dateTo')
+  const perPage = document.getElementById('perPage')
 
-  function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+  let page = 1
+  let totalPages = 1
 
   async function load() {
     try {
-      const from = (page - 1) * limit
-      const to = from + limit - 1
+      const from = (page - 1) * Number(perPage.value || 10)
+      const to = from + Number(perPage.value || 10) - 1
 
-      const { data, error, count } = await supabase
+      
+      let builder = supabase
         .from('atenciones')
         .select('*', { count: 'exact' })
         .order('fecha', { ascending: false })
         .range(from, to)
 
+      
+      const search = qSearch.value.trim()
+      if (search) builder = builder.ilike('nombre_cliente', `%${search}%`)
+
+
+      const filters = []
+      const values = {}
+      if (search) {
+        
+        builder = supabase
+          .from('atenciones')
+          .select('*', { count: 'exact' })
+          .or(`nombre_cliente.ilike.%${search}%,producto.ilike.%${search}%`)
+          .order('fecha', { ascending: false })
+          .range(from, to)
+      } else {
+        builder = supabase
+          .from('atenciones')
+          .select('*', { count: 'exact' })
+          .order('fecha', { ascending: false })
+          .range(from,to)
+      }
+
+      if (dateFrom.value) builder = builder.gte('fecha', dateFrom.value)
+      if (dateTo.value) builder = builder.lte('fecha', dateTo.value)
+
+      const { data, error, count } = await builder
+
       if (error) throw error
+      const total = count || (data ? data.length : 0)
+      totalPages = Math.max(1, Math.ceil(total / Number(perPage.value || 10)))
+      pageInfo.textContent = `Página ${page} de ${totalPages} — Total: ${total}`
 
-      const total = count || 0
-      const pages = Math.max(1, Math.ceil(total / limit))
-      pageInfo.textContent = `Página ${page} de ${pages} - Total: ${total}`
-
-      const rows = (data || []).map(row => `
-        <tr>
-          <td>${row.id_atencion}</td>
-          <td>${row.id_empleado}</td>
-          <td>${escapeHtml(row.nombre_cliente)}</td>
-          <td>${escapeHtml(row.producto)}</td>
-          <td>${row.monto}</td>
-          <td>${row.fecha}</td>
-          <td>
-            <a class="button" href="editar_atencion.html?id=${row.id_atencion}">Editar</a>
-            <a class="button" data-id="${row.id_atencion}" href="#" onclick="del(event)">Eliminar</a>
-          </td>
-        </tr>
-      `).join('')
-
-      tableWrap.innerHTML = `
-        <table>
-          <tr>
-            <th>ID</th><th>Empleado</th><th>Cliente</th><th>Producto</th><th>Monto</th><th>Fecha</th><th>Acciones</th>
-          </tr>
-          ${rows}
-        </table>
-      `
+      renderTable(data || [])
       prevBtn.disabled = page <= 1
-      nextBtn.disabled = page >= pages
+      nextBtn.disabled = page >= totalPages
+
     } catch (err) {
       console.error('Load error:', err)
-      tableWrap.innerHTML = '<p>Error al cargar: ' + (err.message || err) + '</p>'
+      tbody.innerHTML = `<tr><td colspan="7" class="danger">Error al cargar: ${err.message || err}</td></tr>`
+      cardList.innerHTML = `<div class="danger">Error al cargar: ${err.message || err}</div>`
+      pageInfo.textContent = 'Error'
     }
   }
 
-  prevBtn.addEventListener('click', ()=>{ if (page>1) { page--; load() } })
-  nextBtn.addEventListener('click', ()=>{ page++; load() })
+  function renderTable(rows){
+    
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="muted">No hay registros</td></tr>`
+      cardList.innerHTML = `<div class="muted">No hay registros</div>`
+      return
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.id_atencion}</td>
+        <td>${r.id_empleado}</td>
+        <td>${escapeHtml(r.nombre_cliente)}</td>
+        <td>${escapeHtml(r.producto)}</td>
+        <td>${Number(r.monto).toFixed(2)}</td>
+        <td>${r.fecha}</td>
+        <td class="actions">
+          <a class="small-btn" href="editar_atencion.html?id=${r.id_atencion}">Editar</a>
+          <button class="small-btn" data-id="${r.id_atencion}" data-action="del">Eliminar</button>
+        </td>
+      </tr>
+    `).join('')
 
-  window.del = async function(e){
-    e.preventDefault()
-    const id = e.currentTarget.getAttribute('data-id')
-    if(!confirm('Eliminar registro #' + id + '?')) return
+    
+    cardList.innerHTML = rows.map(r => `
+      <div class="card">
+        <div class="row"><strong>#${r.id_atencion}</strong><span class="muted">${r.fecha}</span></div>
+        <div class="meta"><div>Empleado: <strong>${r.id_empleado}</strong></div><div>Cliente: <strong>${escapeHtml(r.nombre_cliente)}</strong></div></div>
+        <div class="meta">Producto: <strong>${escapeHtml(r.producto)}</strong> — Monto: <strong>${Number(r.monto).toFixed(2)}</strong></div>
+        <div class="actions">
+          <a class="small-btn" href="editar_atencion.html?id=${r.id_atencion}">Editar</a>
+          <button class="small-btn" data-id="${r.id_atencion}" data-action="del">Eliminar</button>
+        </div>
+      </div>
+    `).join('')
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+
+  
+  document.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button[data-action="del"]')
+    if (!btn) return
+    const id = btn.getAttribute('data-id')
+    if (!id) return
+    if (!confirm('Eliminar registro #' + id + '?')) return
     try {
       const { error } = await supabase.from('atenciones').delete().eq('id_atencion', id)
       if (error) throw error
@@ -121,10 +301,21 @@
       console.error('Delete error', err)
       alert('Error al eliminar: ' + (err.message || err))
     }
-  }
+  })
 
-  // cargar inicialmente
-  load()
+  
+  prevBtn.addEventListener('click', ()=>{ if (page>1) { page--; load() } })
+  nextBtn.addEventListener('click', ()=>{ if (page<totalPages) { page++; load() } })
+  btnRefresh.addEventListener('click', ()=> load())
+  btnSearch.addEventListener('click', ()=> { page = 1; load() })
+  perPage.addEventListener('change', ()=> { page = 1; load() })
+  qSearch.addEventListener('keydown', (e)=> { if (e.key === 'Enter') { e.preventDefault(); page = 1; load() }})
+
+  
+  (async ()=> {
+    await checkAdminOrRedirect()
+    load()
+  })()
 </script>
 </body>
 </html>

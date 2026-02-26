@@ -1,4 +1,4 @@
-// routes/auth.routes.js
+
 const router = require('express').Router();
 const controller = require('../controllers/auth.controller');
 const { body } = require('express-validator');

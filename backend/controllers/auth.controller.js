@@ -1,10 +1,10 @@
-// controllers/auth.controller.js
+
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const jwtSecret = process.env.JWT_SECRET || 'clave_super_secreta';
-const JWT_EXP = '6h'; // tiempo de expiración
+const JWT_EXP = '6h'; 
 
 exports.register = async (req, res, next) => {
   try {
@@ -16,7 +16,7 @@ exports.register = async (req, res, next) => {
     const [result] = await pool.query('INSERT INTO usuarios (username, password, role) VALUES (?, ?, ?)', [username, hash, role || 'user']);
     const userId = result.insertId;
 
-    // token
+    
     const token = jwt.sign({ id: userId, role: role || 'user' }, jwtSecret, { expiresIn: JWT_EXP });
 
     res.json({ message: 'Usuario creado', token });

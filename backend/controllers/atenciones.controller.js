@@ -1,4 +1,4 @@
-// controllers/atenciones.controller.js
+
 const pool = require('../config/db');
 
 function buildFilters(queryQ, params) {
@@ -31,7 +31,7 @@ exports.getAll = async (req, res, next) => {
 
     const paramsCount = [];
     const baseWhere = ' WHERE 1=1';
-    // If user is not admin, limit to their user_id (requires column user_id in table)
+    
     if (req.user.role !== 'admin') {
       paramsCount.push(req.user.id);
     }
@@ -40,20 +40,19 @@ exports.getAll = async (req, res, next) => {
       whereClause += ' AND user_id = ?';
     }
 
-    // append additional filters
+    
     const extra = buildFilters({ search, date_from, date_to }, paramsCount);
     whereClause += extra;
 
-    // total count
+    
     const countSql = `SELECT COUNT(*) as total FROM atenciones ${whereClause}`;
     const [countRows] = await pool.query(countSql, paramsCount);
     const total = countRows[0].total;
 
-    // data query
+    
     const paramsData = [...paramsCount];
     const dataSql = `SELECT * FROM atenciones ${whereClause} ORDER BY ${pool.escapeId ? sort : 'fecha DESC'} LIMIT ? OFFSET ?`;
-    // Note: we cannot inject sort safely via parameterization; validate server-side if needed. For now only allow simple inputs or default.
-    // Append limit/offset
+
     paramsData.push(limit, offset);
     const [rows] = await pool.query(`SELECT * FROM atenciones ${whereClause} ORDER BY ${sort} LIMIT ? OFFSET ?`, paramsData);
 
@@ -72,7 +71,7 @@ exports.getAll = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     const { id_empleado, nombre_cliente, producto, monto, fecha } = req.body;
-    // associate with req.user.id if present
+    
     const user_id = req.user?.id || null;
 
     await pool.query(
@@ -101,9 +100,9 @@ exports.update = async (req, res, next) => {
     }
     if (!fields.length) return res.status(400).json({ message: 'Nada que actualizar' });
 
-    // Authorization: if user not admin, verify ownership
+    
     if (req.user.role !== 'admin') {
-      // check row owner
+      
       const [r] = await pool.query('SELECT user_id FROM atenciones WHERE id_atencion=?', [id]);
       if (!r.length) return res.status(404).json({ message: 'Registro no encontrado' });
       if (r[0].user_id !== req.user.id) return res.status(403).json({ message: 'No autorizado para actualizar' });

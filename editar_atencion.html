@@ -20,7 +20,7 @@
   const id = params.get('id')
   const form = document.getElementById('form')
 
-  // Protege la página: sólo admin
+  
   (async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -82,7 +82,7 @@
     })
   }
 
-  // carga inicial
+  
   load()
 </script>
 </body>

@@ -1,12 +1,11 @@
-// js/supabaseClient.js
+
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// --- Mantén tu ANON KEY tal como antes ---
-// Si quieres cambiar la key, hazlo aquí. NO pongas service_role en frontend.
+
 export const supabase = createClient(
   'https://dclodqpggfezfqjzsrdx.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjbG9kcXBnZ2ZlemZxanpzcmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwODE3MDgsImV4cCI6MjA4NzY1NzcwOH0.iPMP7wFXTkZMnI6LtG3CIgi_mQUxsBvU_oaRomVbNhM'
 )
 
-// Export global para debug desde consola si lo necesitas
+
 window.supabase = supabase
