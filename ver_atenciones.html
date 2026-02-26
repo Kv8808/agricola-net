@@ -3,20 +3,17 @@
 <head>
 <meta charset="utf-8">
 <title>Ver Atenciones</title>
-<style> body{font-family:Arial;background:#1b5e20;color:white;text-align:center} table{margin:30px auto;border-collapse:collapse;width:90%} th, td{border:1px solid white;padding:8px} a{color:#81c784;text-decoration:none;font-weight:bold} .pagination{margin: 16px;} .button{background:#4caf50;color:white;padding:6px 10px;border-radius:6px;text-decoration:none} </style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:Arial;background:#1b5e20;color:white;text-align:center;padding:20px}
+  table{margin:20px auto;border-collapse:collapse;width:95%;max-width:1000px}
+  th, td{border:1px solid white;padding:8px}
+  a{color:#81c784;text-decoration:none;font-weight:bold}
+  .pagination{margin:12px}
+  .button{background:#4caf50;color:white;padding:6px 10px;border-radius:6px;text-decoration:none;display:inline-block}
+</style>
 </head>
 <body>
-
-<script type="module">
-  import { supabase } from './js/supabaseClient.js'
-  (async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      window.location.href = 'login.html'
-      return
-    }
-  })()
-</script>
 
 <h2>LISTA DE ATENCIONES</h2>
 
@@ -27,10 +24,21 @@
   <button id="next">Siguiente</button>
 </div>
 
-<a href="index.html">Volver al inicio</a>
+<p><a href="index.html">Volver al inicio</a></p>
 
 <script type="module">
   import { supabase } from './js/supabaseClient.js'
+
+  // Proteger la página
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      window.location.href = 'login.html'
+      return
+    }
+  })()
+
+  // Lógica paginación y carga
   let page = 1, limit = 10
   const tableWrap = document.getElementById('table-wrap')
   const pageInfo = document.getElementById('pageInfo')
@@ -94,12 +102,18 @@
     e.preventDefault()
     const id = e.currentTarget.getAttribute('data-id')
     if(!confirm('Eliminar registro #' + id + '?')) return
-    const { data, error } = await supabase.from('atenciones').delete().eq('id_atencion', id)
-    if(error){ alert('Error al eliminar: ' + error.message); console.error(error); return }
-    alert('Eliminado')
-    load()
+    try {
+      const { error } = await supabase.from('atenciones').delete().eq('id_atencion', id)
+      if (error) throw error
+      alert('Eliminado')
+      load()
+    } catch (err) {
+      console.error('Delete error', err)
+      alert('Error al eliminar: ' + (err.message || err))
+    }
   }
 
+  // cargar inicialmente
   load()
 </script>
 </body>

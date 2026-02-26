@@ -1,28 +1,41 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><title>Login</title></head>
-<body>
-<h2>Login</h2>
-<form id="f">
-  <input id="email" type="email" required placeholder="Email">
-  <input id="pass" type="password" required placeholder="Contraseña">
-  <button>Ingresar</button>
-</form>
+<head>
+  <meta charset="utf-8">
+  <title>Login - AGRÍCOLA NET</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="font-family:Arial; text-align:center; padding:40px; background:#f6f6f6;">
+  <h2>Login</h2>
 
-<script type="module">
-  import { supabase } from './js/supabaseClient.js'
+  <form id="f" style="max-width:360px;margin:0 auto;">
+    <input id="email" type="email" required placeholder="Email" style="width:100%;padding:8px;margin:8px 0">
+    <input id="pass" type="password" required placeholder="Contraseña" style="width:100%;padding:8px;margin:8px 0">
+    <button type="submit" style="padding:8px 16px;background:#2e7d32;color:white;border:none;border-radius:4px;cursor:pointer">Ingresar</button>
+  </form>
 
-  document.getElementById('f').addEventListener('submit', async e=>{
-    e.preventDefault()
-    const email = document.getElementById('email').value
-    const pass = document.getElementById('pass').value
+  <p style="margin-top:12px;"><a href="signup.html">¿No tienes cuenta? Regístrate</a></p>
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass })
-    if(error) return alert(error.message)
+  <script type="module">
+    import { supabase } from './js/supabaseClient.js'
 
-    // login ok → redirigir a index
-    window.location.href = 'index.html'
-  })
-</script>
+    const form = document.getElementById('f')
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('pass').value
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) throw error
+        // Login correcto
+        // Por seguridad, recargar para asegurar estado de sesión limpio
+        window.location.href = 'index.html'
+      } catch (err) {
+        alert(err.message || 'Error al iniciar sesión')
+        console.error('Login error', err)
+      }
+    })
+  </script>
 </body>
 </html>
